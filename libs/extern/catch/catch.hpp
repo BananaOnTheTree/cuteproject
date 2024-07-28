@@ -6388,6 +6388,10 @@ namespace Catch {
 #  undef WIN32_LEAN_AND_MEAN
 #endif
 
+#ifndef SIGSTKSZ
+#define SIGSTKSZ 8192 // or any appropriate size
+#endif
+
 
 #  if !defined ( CATCH_CONFIG_WINDOWS_SEH )
 
@@ -6500,7 +6504,7 @@ namespace Catch {
         static bool isSet;
         static struct sigaction oldSigActions [sizeof(signalDefs)/sizeof(SignalDefs)];
         static stack_t oldSigStack;
-        static char altStackMem[1000000];
+        static char altStackMem[SIGSTKSZ];
 
         static void handleSignal( int sig ) {
             std::string name = "<unknown signal>";
@@ -6520,7 +6524,7 @@ namespace Catch {
             isSet = true;
             stack_t sigStack;
             sigStack.ss_sp = altStackMem;
-            sigStack.ss_size = 1000000;
+            sigStack.ss_size = SIGSTKSZ;
             sigStack.ss_flags = 0;
             sigaltstack(&sigStack, &oldSigStack);
             struct sigaction sa = { 0 };
@@ -6551,7 +6555,7 @@ namespace Catch {
     bool FatalConditionHandler::isSet = false;
     struct sigaction FatalConditionHandler::oldSigActions[sizeof(signalDefs)/sizeof(SignalDefs)] = {};
     stack_t FatalConditionHandler::oldSigStack = {};
-    char FatalConditionHandler::altStackMem[1000000] = {};
+    char FatalConditionHandler::altStackMem[SIGSTKSZ] = {};
 
 } // namespace Catch
 
